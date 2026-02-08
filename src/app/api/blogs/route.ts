@@ -42,7 +42,11 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("GET blogs error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch blogs" },
+      { 
+        error: "Failed to fetch blogs",
+        details: error instanceof Error ? error.message : "Unknown error",
+        mongoUri: process.env.MONGODB_URI ? "Set" : "Missing"
+      },
       { status: 500 },
     );
   }

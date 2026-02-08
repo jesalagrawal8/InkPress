@@ -4,8 +4,28 @@ import User from "@/models/User";
 import Blog from "@/models/Blog";
 import bcrypt from "bcryptjs";
 
+// GET endpoint for diagnostics
+export async function GET() {
+  return NextResponse.json({
+    mongoUri: process.env.MONGODB_URI ? "Set (hidden for security)" : "Not Set",
+    nextAuthSecret: process.env.NEXTAUTH_SECRET ? "Set" : "Not Set",
+    nextAuthUrl: process.env.NEXTAUTH_URL || "Not Set",
+  });
+}
+
 export async function POST() {
   try {
+    // Check if MONGODB_URI is set
+    if (!process.env.MONGODB_URI) {
+      return NextResponse.json(
+        {
+          error: "MONGODB_URI environment variable is not set",
+          hint: "Please set MONGODB_URI in Vercel environment variables",
+        },
+        { status: 500 },
+      );
+    }
+
     await connectDB();
 
     let adminCreated = false;
