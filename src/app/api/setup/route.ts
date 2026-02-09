@@ -4,6 +4,16 @@ import User from "@/models/User";
 import Blog from "@/models/Blog";
 import bcrypt from "bcryptjs";
 
+// GET - Diagnostics endpoint
+export async function GET() {
+  const mongoUri = process.env.MONGODB_URI || "";
+  return NextResponse.json({
+    mongoUri: mongoUri ? `Set (${mongoUri.substring(0, 20)}...${mongoUri.includes("/inkpress") ? " [has db name]" : " [MISSING db name!]"})` : "NOT SET",
+    nextAuthSecret: process.env.NEXTAUTH_SECRET ? "Set" : "NOT SET",
+    nextAuthUrl: process.env.NEXTAUTH_URL || "NOT SET",
+  });
+}
+
 export async function POST() {
   try {
     // Check if MONGODB_URI is set
