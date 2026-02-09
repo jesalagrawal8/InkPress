@@ -73,10 +73,10 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/admin/login"
-                className="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-all hidden sm:inline-flex items-center gap-1"
+                className="inline-flex items-center gap-1 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 transition-all"
               >
                 <User className="w-4 h-4" />
-                Admin
+                <span className="hidden sm:inline">Admin</span>
               </Link>
             )}
 
