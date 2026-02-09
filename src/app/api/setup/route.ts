@@ -9,7 +9,7 @@ export async function GET() {
       message: "Setup endpoint disabled for production",
       hint: "Run complete-setup.sql in your Supabase SQL Editor to initialize database",
     },
-    { status: 403 }
+    { status: 403 },
   );
 }
 
@@ -19,7 +19,6 @@ export async function POST() {
       message: "Setup endpoint disabled for production",
       hint: "Run complete-setup.sql in your Supabase SQL Editor to initialize database",
     },
-    { status: 403 }
+    { status: 403 },
   );
 }
-
