@@ -48,15 +48,15 @@ export async function generateMetadata({
       title: blog.title,
       description: blog.excerpt,
       type: "article",
-      publishedTime: blog.createdAt,
+      publishedTime: blog.created_at,
       authors: [blog.author],
-      images: blog.coverImage ? [blog.coverImage] : [],
+      images: blog.cover_image ? [blog.cover_image] : [],
     },
     twitter: {
       card: "summary_large_image",
       title: blog.title,
       description: blog.excerpt,
-      images: blog.coverImage ? [blog.coverImage] : [],
+      images: blog.cover_image ? [blog.cover_image] : [],
     },
   };
 }
@@ -81,10 +81,10 @@ export default async function BlogPage({ params }: BlogPageProps) {
         </Link>
 
         {/* Cover Image */}
-        {blog.coverImage && (
+        {blog.cover_image && (
           <div className="relative h-96 w-full rounded-xl overflow-hidden mb-8">
             <img
-              src={blog.coverImage}
+              src={blog.cover_image}
               alt={blog.title}
               className="w-full h-full object-cover"
             />
@@ -105,7 +105,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
             </span>
             <span className="flex items-center">
               <Calendar className="w-5 h-5 mr-2" />
-              {formatDate(blog.createdAt)}
+              {formatDate(blog.created_at)}
             </span>
           </div>
 

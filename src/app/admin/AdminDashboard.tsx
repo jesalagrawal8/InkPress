@@ -112,7 +112,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {blogs.map((blog) => (
-                  <tr key={blog._id}>
+                  <tr key={blog.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {blog.title}
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {formatDate(blog.createdAt)}
+                        {formatDate(blog.created_at)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -149,14 +149,14 @@ export default function AdminDashboard() {
                           <Eye className="w-5 h-5" />
                         </Link>
                         <Link
-                          href={`/admin/edit/${blog._id}`}
+                          href={`/admin/edit/${blog.id}`}
                           className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
                           title="Edit"
                         >
                           <Edit className="w-5 h-5" />
                         </Link>
                         <button
-                          onClick={() => handleDelete(blog._id)}
+                          onClick={() => handleDelete(blog.id)}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                           title="Delete"
                         >

@@ -1,14 +1,35 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import User from "@/models/User";
-import Blog from "@/models/Blog";
-import bcrypt from "bcryptjs";
+
+// This endpoint has been disabled for production
+// Use complete-setup.sql in Supabase SQL Editor to initialize database
+
+export async function GET() {
+  return NextResponse.json(
+    {
+      message: "Setup endpoint disabled",
+      hint: "Run complete-setup.sql in your Supabase SQL Editor",
+    },
+    { status: 404 },
+  );
+}
+
+export async function POST() {
+  return NextResponse.json(
+    {
+      message: "Setup endpoint disabled",
+      hint: "Run complete-setup.sql in your Supabase SQL Editor",
+    },
+    { status: 404 },
+  );
+}
 
 // GET - Diagnostics endpoint
 export async function GET() {
-  const mongoUri = process.env.MONGODB_URI || "";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
   return NextResponse.json({
-    mongoUri: mongoUri ? `Set (${mongoUri.substring(0, 20)}...${mongoUri.includes("/inkpress") ? " [has db name]" : " [MISSING db name!]"})` : "NOT SET",
+    supabaseUrl: supabaseUrl ? "Set" : "NOT SET",
+    supabaseKey: supabaseKey ? "Set" : "NOT SET",
     nextAuthSecret: process.env.NEXTAUTH_SECRET ? "Set" : "NOT SET",
     nextAuthUrl: process.env.NEXTAUTH_URL || "NOT SET",
   });
@@ -16,90 +37,58 @@ export async function GET() {
 
 export async function POST() {
   try {
-    // Check if MONGODB_URI is set
-    if (!process.env.MONGODB_URI) {
+    // Check if Supabase credentials are set
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ) {
       return NextResponse.json(
         {
-          error: "MONGODB_URI environment variable is not set",
-          hint: "Please set MONGODB_URI in Vercel environment variables",
+          error: "Supabase environment variables are not set",
+          hint: "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY",
         },
         { status: 500 },
       );
     }
 
-    await connectDB();
-
     let adminCreated = false;
-    let blogsCreated = 0;
+
+    // Get admin credentials from environment variables
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@inkpress.com";
+    const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
 
     // Check if admin already exists
-    const existingUser = await User.findOne({ email: "admin@inkpress.com" });
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", adminEmail.toLowerCase())
+      .single();
+
     if (!existingUser) {
       // Create admin user
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      await User.create({
-        email: "admin@inkpress.com",
-        password: hashedPassword,
-        name: "Admin",
-        role: "admin",
-      });
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const { error } = await supabase.from("users").insert([
+        {
+          email: adminEmail.toLowerCase(),
+          password: hashedPassword,
+          name: "Admin",
+          role: "admin",
+        },
+      ]);
+
+      if (error) {
+        throw error;
+      }
+
       adminCreated = true;
-    }
-
-    // Check if blogs already exist
-    const existingBlogs = await Blog.countDocuments();
-    if (existingBlogs === 0) {
-      // Create sample blogs
-      const sampleBlogs = [
-        {
-          title: "Getting Started with Next.js 14",
-          slug: "getting-started-with-nextjs-14",
-          content: `<h2>Introduction to Next.js 14</h2><p>Next.js 14 introduces powerful new features that make building modern web applications easier than ever.</p>`,
-          excerpt:
-            "Learn about the exciting new features in Next.js 14 and how they can improve your web development workflow.",
-          coverImage:
-            "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800",
-          author: "Admin",
-          tags: ["nextjs", "react", "webdev", "tutorial"],
-          published: true,
-        },
-        {
-          title: "Mastering TypeScript for Modern Applications",
-          slug: "mastering-typescript-for-modern-applications",
-          content: `<h2>Why TypeScript?</h2><p>TypeScript has become the de facto standard for building large-scale JavaScript applications.</p>`,
-          excerpt:
-            "Discover the power of TypeScript and learn best practices for building type-safe applications.",
-          coverImage:
-            "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800",
-          author: "Admin",
-          tags: ["typescript", "javascript", "programming", "best-practices"],
-          published: true,
-        },
-        {
-          title: "Building Scalable APIs with MongoDB",
-          slug: "building-scalable-apis-with-mongodb",
-          content: `<h2>MongoDB for Modern Applications</h2><p>MongoDB is a powerful NoSQL database that excels at handling unstructured data.</p>`,
-          excerpt:
-            "Learn how to design efficient MongoDB schemas and build scalable APIs for your applications.",
-          coverImage:
-            "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800",
-          author: "Admin",
-          tags: ["mongodb", "database", "api", "backend"],
-          published: true,
-        },
-      ];
-
-      await Blog.insertMany(sampleBlogs);
-      blogsCreated = sampleBlogs.length;
     }
 
     return NextResponse.json(
       {
         message: "Database initialized successfully!",
         adminCreated,
-        blogsCreated,
         credentials: adminCreated
-          ? { email: "admin@inkpress.com", password: "admin123" }
+          ? { email: adminEmail, password: adminPassword }
           : "Admin already existed",
       },
       { status: 201 },

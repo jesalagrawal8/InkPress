@@ -1,15 +1,15 @@
 export interface BlogPost {
-  _id: string;
+  id: string;
   title: string;
   slug: string;
   content: string;
   excerpt: string;
-  coverImage?: string;
+  cover_image?: string;
   author: string;
   tags: string[];
   published: boolean;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface User {

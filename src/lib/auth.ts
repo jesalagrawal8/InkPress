@@ -1,7 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { connectDB } from "@/lib/db";
-import User from "@/models/User";
+import { supabase } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
@@ -17,11 +16,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        await connectDB();
+        const { data: user, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("email", credentials.email.toLowerCase())
+          .single();
 
-        const user = await User.findOne({ email: credentials.email });
-
-        if (!user) {
+        if (error || !user) {
           throw new Error("No user found with this email");
         }
 
@@ -35,7 +36,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          id: user._id.toString(),
+          id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,

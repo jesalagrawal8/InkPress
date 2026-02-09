@@ -1,42 +1,15 @@
-import mongoose from "mongoose";
+import { createClient } from "@supabase/supabase-js";
 
-const MONGODB_URI = process.env.MONGODB_URI || "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-if (!MONGODB_URI) {
-  console.error("MONGODB_URI environment variable is not defined");
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Supabase environment variables are not defined");
 }
 
-let cached = (global as any).mongoose;
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
-}
-
-export const connectDB = async () => {
-  if (cached.conn) {
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
-  }
-
-  try {
-    cached.conn = await cached.promise;
-  } catch (error) {
-    cached.promise = null;
-    console.error("MongoDB connection error:", error);
-    throw new Error("Failed to connect to database");
-  }
-
-  return cached.conn;
+// Helper function to get Supabase client (for consistency with old API)
+export const getSupabaseClient = () => {
+  return supabase;
 };

@@ -1,51 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { connectDB } from "@/lib/db";
-import Blog from "@/models/Blog";
+import { supabase } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
 
-// GET all blogs or single blog by ID
+// GET all blogs or single blog by ID/slug
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
-
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     const slug = searchParams.get("slug");
     const published = searchParams.get("published");
 
     if (id) {
-      const blog = await Blog.findById(id);
-      if (!blog) {
+      const { data: blog, error } = await supabase
+        .from("blogs")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error || !blog) {
         return NextResponse.json({ error: "Blog not found" }, { status: 404 });
       }
       return NextResponse.json(blog);
     }
 
     if (slug) {
-      const blog = await Blog.findOne({ slug });
-      if (!blog) {
+      const { data: blog, error } = await supabase
+        .from("blogs")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+
+      if (error || !blog) {
         return NextResponse.json({ error: "Blog not found" }, { status: 404 });
       }
       return NextResponse.json(blog);
     }
 
     // Get all blogs
-    let query = {};
+    let query = supabase
+      .from("blogs")
+      .select("*")
+      .order("created_at", { ascending: false });
+
     if (published === "true") {
-      query = { published: true };
+      query = query.eq("published", true);
     }
 
-    const blogs = await Blog.find(query).sort({ createdAt: -1 });
-    return NextResponse.json(blogs);
+    const { data: blogs, error } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json(blogs || []);
   } catch (error) {
     console.error("GET blogs error:", error);
     return NextResponse.json(
       {
         error: "Failed to fetch blogs",
         details: error instanceof Error ? error.message : "Unknown error",
-        mongoUri: process.env.MONGODB_URI ? "Set" : "Missing",
       },
       { status: 500 },
     );
@@ -61,8 +76,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await connectDB();
-
     const body = await req.json();
     const { title, content, excerpt, coverImage, tags } = body;
 
@@ -75,24 +88,44 @@ export async function POST(req: NextRequest) {
 
     // Generate unique slug
     let slug = generateSlug(title);
-    let existingBlog = await Blog.findOne({ slug });
+    let { data: existingBlog } = await supabase
+      .from("blogs")
+      .select("id")
+      .eq("slug", slug)
+      .single();
+
     let counter = 1;
     while (existingBlog) {
       slug = `${generateSlug(title)}-${counter}`;
-      existingBlog = await Blog.findOne({ slug });
+      const result = await supabase
+        .from("blogs")
+        .select("id")
+        .eq("slug", slug)
+        .single();
+      existingBlog = result.data;
       counter++;
     }
 
-    const blog = await Blog.create({
-      title,
-      slug,
-      content,
-      excerpt,
-      coverImage,
-      tags: tags || [],
-      author: session.user?.name || "Admin",
-      published: true,
-    });
+    const { data: blog, error } = await supabase
+      .from("blogs")
+      .insert([
+        {
+          title,
+          slug,
+          content,
+          excerpt,
+          cover_image: coverImage,
+          tags: tags || [],
+          author: session.user?.name || "Admin",
+          published: true,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json(blog, { status: 201 });
   } catch (error) {
@@ -113,8 +146,6 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await connectDB();
-
     const body = await req.json();
     const { id, title, content, excerpt, coverImage, tags, published } = body;
 
@@ -129,25 +160,33 @@ export async function PUT(req: NextRequest) {
       title,
       content,
       excerpt,
-      coverImage,
+      cover_image: coverImage,
       tags,
       published,
+      updated_at: new Date().toISOString(),
     };
 
     // Update slug if title changed
     if (title) {
-      const existingBlog = await Blog.findById(id);
+      const { data: existingBlog } = await supabase
+        .from("blogs")
+        .select("title")
+        .eq("id", id)
+        .single();
+
       if (existingBlog && existingBlog.title !== title) {
         updateData.slug = generateSlug(title);
       }
     }
 
-    const blog = await Blog.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const { data: blog, error } = await supabase
+      .from("blogs")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
 
-    if (!blog) {
+    if (error || !blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
@@ -170,8 +209,6 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await connectDB();
-
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -182,9 +219,9 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const blog = await Blog.findByIdAndDelete(id);
+    const { error } = await supabase.from("blogs").delete().eq("id", id);
 
-    if (!blog) {
+    if (error) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 

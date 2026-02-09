@@ -11,11 +11,11 @@ export default function BlogCard({ blog }: BlogCardProps) {
   return (
     <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden group">
       {/* Cover Image */}
-      {blog.coverImage && (
+      {blog.cover_image && (
         <Link href={`/blogs/${blog.slug}`}>
           <div className="relative h-48 overflow-hidden">
             <img
-              src={blog.coverImage}
+              src={blog.cover_image}
               alt={blog.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -60,7 +60,7 @@ export default function BlogCard({ blog }: BlogCardProps) {
             </span>
             <span className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />
-              {formatDate(blog.createdAt)}
+              {formatDate(blog.created_at)}
             </span>
           </div>
         </div>

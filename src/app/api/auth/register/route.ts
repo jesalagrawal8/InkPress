@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import User from "@/models/User";
+import { supabase } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   try {
-    await connectDB();
-
     const { email, password, name } = await req.json();
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", email.toLowerCase())
+      .single();
+
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
@@ -22,15 +24,25 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const user = await User.create({
-      email,
-      password: hashedPassword,
-      name,
-      role: "admin", // First user is admin
-    });
+    const { data: user, error } = await supabase
+      .from("users")
+      .insert([
+        {
+          email: email.toLowerCase(),
+          password: hashedPassword,
+          name,
+          role: "admin", // First user is admin
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json(
-      { message: "User created successfully", userId: user._id },
+      { message: "User created successfully", userId: user.id },
       { status: 201 },
     );
   } catch (error) {

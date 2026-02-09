@@ -38,7 +38,7 @@ export default function EditBlogForm({ blogId }: EditBlogFormProps) {
         title: blog.title,
         content: blog.content,
         excerpt: blog.excerpt,
-        coverImage: blog.coverImage || "",
+        coverImage: blog.cover_image || "",
         tags: blog.tags.join(", "),
         published: blog.published,
       });
