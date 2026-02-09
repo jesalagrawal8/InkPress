@@ -1,103 +1,264 @@
 # InkPress - Modern Blog Platform
 
-A full-stack blog platform built with Next.js 14, TypeScript, MongoDB, and NextAuth.js. Features a modern, responsive UI with dark mode support, SEO optimization, and a protected admin panel for content management.
+A modern, lightweight blog platform built with Next.js 14, TypeScript, and Supabase.
 
-![InkPress](https://via.placeholder.com/800x400/3B82F6/FFFFFF?text=InkPress+Blog+Platform)
+## 🚀 Features
 
-## 🚀 Live Demo
-
-**Live URL:** [Your Vercel URL here after deployment]
-
-**Demo Credentials:**
-
-- Email: `admin@inkpress.com`
-- Password: `admin123`
-
-## ✨ Features
-
-### Core Features
-
-- ✅ **Modern Landing Page** - Polished UI with hero section and feature highlights
-- ✅ **Blog Listing Page** - Clean card-based grid layout displaying all blogs
-- ✅ **Blog Detail Page** - Full blog content with SEO-friendly URLs
-- ✅ **Admin Authentication** - Secure login/logout with NextAuth.js
-- ✅ **Protected Admin Panel** - Create, Edit, Delete blogs with authorization
-- ✅ **SEO Optimized** - Meta tags, Open Graph, clean slugs
-- ✅ **MongoDB Database** - Efficient data storage and retrieval
-- ✅ **Fully Responsive** - Works seamlessly on mobile and desktop
-
-### Extra Feature (Dark/Light Mode)
-
-- 🌓 **Theme Toggle** - Switch between dark and light modes
-- 💾 **Persistent Theme** - Theme preference saved across sessions
-- 🎨 **Smooth Transitions** - Beautiful theme switching animations
-
-### Additional Features
-
-- 🔐 Password hashing with bcryptjs
-- 🎯 TypeScript for type safety
-- 🎨 Tailwind CSS for styling
-- 📱 Mobile-first responsive design
-- ♿ Accessibility features (ARIA labels, semantic HTML)
-- ⚡ Optimized performance with Next.js App Router
-- 🔄 Loading states and error handling
-- 📝 Rich text support (HTML in blog content)
-- 🏷️ Tag system for blog categorization
+- ✨ Modern, responsive design with dark mode support
+- 📝 Admin dashboard for creating and managing blog posts
+- 🔒 Secure authentication with NextAuth.js
+- 🎨 Rich text content support with HTML rendering
+- 🏷️ Tag-based blog organization
+- 🌐 SEO optimized with clean URLs
+- ⚡ Fast and lightweight
+- 📱 Mobile responsive design
 
 ## 🛠️ Tech Stack
 
-### Frontend
+- **Framework:** Next.js 14 with App Router
+- **Language:** TypeScript
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** NextAuth.js
+- **Styling:** Tailwind CSS
+- **Icons:** Lucide React
+- **Notifications:** React Hot Toast
 
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type-safe code
-- **Tailwind CSS** - Utility-first CSS framework
-- **next-themes** - Dark mode implementation
-- **lucide-react** - Beautiful icons
-- **react-hot-toast** - Toast notifications
+## 📦 Installation & Setup
 
-### Backend & Database
+### 1. Clone and Install Dependencies
 
-- **Next.js API Routes** - Server-side API endpoints
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB ODM
-- **NextAuth.js** - Authentication solution
+```bash
+git clone https://github.com/jesalagrawal8/InkPress.git
+cd InkPress
+npm install
+```
 
-### Development Tools
+### 2. Configure Environment Variables
 
-- **ESLint** - Code linting
-- **PostCSS** - CSS processing
-- **Autoprefixer** - CSS vendor prefixing
+Create a `.env.local` file in the root directory:
 
-## 📁 Folder Structure
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# NextAuth Configuration
+NEXTAUTH_SECRET=generate_random_secret_here
+NEXTAUTH_URL=http://localhost:3000
+
+# Admin Credentials
+ADMIN_EMAIL=admin@inkpress.com
+ADMIN_PASSWORD=your_secure_password
+```
+
+**Generate NEXTAUTH_SECRET:**
+```bash
+openssl rand -base64 32
+```
+
+### 3. Setup Supabase Database
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to SQL Editor in your Supabase dashboard
+3. Run the SQL from `complete-setup.sql` file to create tables and admin user
+4. Optionally, run `add-sample-blogs.sql` to add 5 sample blog posts
+
+### 4. Get Supabase Credentials
+
+In your Supabase project:
+1. Go to **Settings** → **API**
+2. Copy the **Project URL** → Add to `NEXT_PUBLIC_SUPABASE_URL`
+3. Copy the **anon public** key → Add to `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 5. Start Development Server
+
+```bash
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000)
+
+### 6. Login to Admin Panel
+
+Go to [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+
+- **Email:** admin@inkpress.com
+- **Password:** (whatever you set in .env.local)
+
+## 📁 Project Structure
 
 ```
 InkPress/
 ├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── layout.tsx           # Root layout with providers
-│   │   ├── page.tsx             # Landing page
-│   │   ├── globals.css          # Global styles
-│   │   ├── blogs/               # Blog pages
-│   │   │   ├── page.tsx         # Blog listing page
-│   │   │   ├── BlogList.tsx     # Client component for blogs
-│   │   │   └── [slug]/          # Dynamic blog detail
-│   │   │       ├── page.tsx     # Blog detail page
-│   │   │       └── not-found.tsx
-│   │   ├── admin/               # Admin panel
-│   │   │   ├── page.tsx         # Admin dashboard
-│   │   │   ├── AdminDashboard.tsx
-│   │   │   ├── login/           # Admin login
-│   │   │   │   └── page.tsx
-│   │   │   ├── create/          # Create blog
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── CreateBlogForm.tsx
-│   │   │   └── edit/[id]/       # Edit blog
-│   │   │       ├── page.tsx
-│   │   │       └── EditBlogForm.tsx
-│   │   └── api/                 # API routes
-│   │       ├── auth/
-│   │       │   ├── [...nextauth]/
-│   │       │   │   └── route.ts  # NextAuth configuration
+│   ├── app/
+│   │   ├── admin/          # Admin dashboard pages
+│   │   │   ├── page.tsx    # Dashboard
+│   │   │   ├── login/      # Login page
+│   │   │   ├── create/     # Create blog
+│   │   │   └── edit/[id]/  # Edit blog
+│   │   ├── api/            # API routes
+│   │   │   ├── auth/       # Authentication
+│   │   │   ├── blogs/      # Blog CRUD operations
+│   │   │   └── setup/      # Setup endpoint (disabled)
+│   │   ├── blogs/          # Public blog pages
+│   │   │   ├── page.tsx    # Blog listing
+│   │   │   └── [slug]/     # Blog detail
+│   │   ├── layout.tsx      # Root layout
+│   │   └── page.tsx        # Homepage
+│   ├── components/         # Reusable components
+│   │   ├── BlogCard.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── ThemeProvider.tsx
+│   │   └── ThemeToggle.tsx
+│   ├── lib/                # Utilities and configurations
+│   │   ├── auth.ts         # NextAuth config
+│   │   ├── db.ts           # Supabase client
+│   │   └── utils.ts        # Helper functions
+│   ├── models/             # TypeScript interfaces
+│   │   ├── Blog.ts
+│   │   └── User.ts
+│   └── types/              # Type definitions
+├── complete-setup.sql      # Database initialization script
+├── add-sample-blogs.sql    # Sample blog data (5 posts)
+└── .env.local              # Environment variables (create this)
+```
+
+## 🚢 Deployment
+
+### Deploy to Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Import project to [Vercel](https://vercel.com)
+3. Add environment variables in Vercel dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXTAUTH_SECRET`
+   - `NEXTAUTH_URL` (set to your production domain)
+   - `ADMIN_EMAIL`
+   - `ADMIN_PASSWORD`
+4. Deploy!
+
+**Important:** Update `NEXTAUTH_URL` to your production domain:
+```env
+NEXTAUTH_URL=https://yourdomain.vercel.app
+```
+
+### Deploy to Other Platforms
+
+InkPress can be deployed to any platform that supports Next.js:
+- Netlify
+- Railway
+- Render
+- Self-hosted with PM2
+
+## 📝 Creating Blog Posts
+
+1. Login to admin panel at `/admin/login`
+2. Click "Create New Blog"
+3. Fill in:
+   - **Title:** Your blog title
+   - **Content:** HTML content (supports all HTML tags)
+   - **Excerpt:** Short description (max 200 chars)
+   - **Cover Image:** Image URL (optional)
+   - **Tags:** Comma-separated tags
+4. Click "Create Blog"
+5. Your blog post is now live!
+
+## 🔄 Database Schema
+
+### Users Table
+```sql
+- id (UUID, primary key)
+- email (unique)
+- password (bcrypt hashed)
+- name
+- role (admin/user)
+- created_at
+```
+
+### Blogs Table
+```sql
+- id (UUID, primary key)
+- title
+- slug (unique, URL-friendly)
+- content (HTML)
+- excerpt (max 200 chars)
+- cover_image (URL)
+- author
+- tags (array)
+- published (boolean)
+- created_at
+- updated_at
+```
+
+## 🔐 Security Features
+
+- ✅ Passwords hashed with bcrypt
+- ✅ Protected API routes with authentication
+- ✅ Environment variables for sensitive data
+- ✅ SQL injection prevention with Supabase
+- ✅ XSS protection with React
+- ✅ CSRF tokens with NextAuth.js
+
+## 🎯 Quick Commands
+
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm start        # Start production server
+npm run lint     # Run ESLint
+```
+
+## 📚 Sample Data
+
+The project includes `add-sample-blogs.sql` with 5 sample blog posts:
+1. Getting Started with Next.js 14
+2. Mastering TypeScript for Modern Applications
+3. Building Scalable APIs with Supabase
+4. The Future of Web Development in 2026
+5. React Server Components Deep Dive
+
+Run this SQL in Supabase SQL Editor to add sample data.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+MIT License - feel free to use this project for personal or commercial purposes.
+
+## 🆘 Troubleshooting
+
+### Login Issues
+- Verify Supabase credentials are correct
+- Check that `complete-setup.sql` was run successfully
+- Ensure admin user exists in users table
+
+### Build Errors
+- Clear `.next` folder: `rm -rf .next`
+- Reinstall dependencies: `npm install`
+- Check all environment variables are set
+
+### Database Connection
+- Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Check Supabase project is active
+- Ensure tables were created from `complete-setup.sql`
+
+## 🙏 Acknowledgments
+
+Built with ❤️ using:
+- [Next.js](https://nextjs.org/)
+- [Supabase](https://supabase.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [NextAuth.js](https://next-auth.js.org/)
+
+---
+
+**Live Demo:** https://ink-press-iota.vercel.app
+
+**Admin Login:** Email: `admin@inkpress.com` | Password: `admin123`
 │   │       │   └── register/
 │   │       │       └── route.ts  # User registration
 │   │       └── blogs/
